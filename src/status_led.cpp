@@ -24,7 +24,7 @@ void setConfiguration(int in_pilot_mode, int in_remote_mode)
         gpio_write(pi, red, 1);
         gpio_write(pi, blue, 0);
     }
-    if ( isAutoSteering() ) {
+    if ( isAutoSteering() && !isAutoThrottle() ) {
         gpio_write(pi, red, 0);
         if (pilot_mode == 1) {
             gpio_write(pi, blue, 1);
