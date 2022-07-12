@@ -8,38 +8,37 @@ int pi;
 int remote_mode = 0, pilot_mode = 0;
 int red = 16, green = 21, blue = 20;
 
-bool isAutoSteering() { return pilot_mode == 1; }
-bool isAutoThrottle() { return pilot_mode == 1 &&  remote_mode == 1; }
-bool isThrottleAttenuated() { return remote_mode != 1; }
+bool isAutoSteering() { return remote_mode > -1; }
+bool isAutoThrottle() { return remote_mode == 1; }
 
 void setConfiguration(int in_pilot_mode, int in_remote_mode)
 {
+    if (pilot_mode == in_pilot_mode && remote_mode == in_remote_mode) return;
+
     pilot_mode = in_pilot_mode;
     remote_mode = in_remote_mode;
     
-    if ( isAutoSteering() )
+    if ( isAutoSteering() && isAutoThrottle() )
     {
-        if ( isAutoThrottle() )
-        {
-            gpio_write(pi, green, 0);
-            gpio_write(pi, red, 1);
-            gpio_write(pi, blue, 0);
-        } else {
-            gpio_write(pi, green, 0);
-            gpio_write(pi, red, 0);
+        gpio_write(pi, green, 0);
+        gpio_write(pi, red, 1);
+        gpio_write(pi, blue, 0);
+    }
+    if ( isAutoSteering() ) {
+        gpio_write(pi, red, 0);
+        if (pilot_mode == 1) {
             gpio_write(pi, blue, 1);
-        }
-    } else {
-        if ( isThrottleAttenuated() )
-        {
-            gpio_write(pi, green, 1);
-            gpio_write(pi, red, 0);
-            gpio_write(pi, blue, 0);
-        } else {
             gpio_write(pi, green, 0);
-            gpio_write(pi, red, 1);
-            gpio_write(pi, blue, 0);
+        } else {
+            gpio_write(pi, blue, 1);
+            gpio_write(pi, green, 1);
         }
+    }
+    if ( !isAutoSteering() && !isAutoThrottle() )
+    {
+        gpio_write(pi, green, 1);
+        gpio_write(pi, red, 0);
+        gpio_write(pi, blue, 0);
     }
 }
 
